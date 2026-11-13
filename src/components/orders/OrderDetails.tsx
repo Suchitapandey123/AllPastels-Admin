@@ -7,7 +7,7 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { AlertIcon } from "@/components/icons";
 import { ApiError } from "@/lib/api";
 import { formatINR } from "@/lib/format";
-import { formatDate } from "@/lib/dates";
+import { formatDate, formatDateTime } from "@/lib/dates";
 import {
   addOrderNote,
   cancelOrder,
@@ -138,8 +138,8 @@ export function OrderDetails({ id }: { id: string }) {
           <p className="ap-eyebrow text-ash-300">Order details</p>
           <h1 className="text-3xl">{order.orderNumber}</h1>
           <p className="mt-1 text-sm text-ash-200">
-            Placed {formatDate(order.createdAt)} — live data from the backend
-            API.
+            Placed {formatDateTime(order.createdAt)} — live data from the
+            backend API.
           </p>
         </div>
         <div className="flex gap-3">
@@ -290,6 +290,37 @@ export function OrderDetails({ id }: { id: string }) {
               ) : (
                 <p className="text-ash-200">No address supplied.</p>
               )}
+              {order.billingAddress ? (
+                <div className="mt-4 flex flex-col gap-1 border-t border-line pt-4">
+                  <p className="ap-eyebrow mb-1 text-ash-300">
+                    Billing address
+                  </p>
+                  <p className="font-medium">{order.billingAddress.fullName}</p>
+                  <p className="text-ash-200">
+                    {order.billingAddress.line1}
+                    {order.billingAddress.line2
+                      ? `, ${order.billingAddress.line2}`
+                      : ""}
+                  </p>
+                  <p className="text-ash-200">
+                    {order.billingAddress.city}
+                    {order.billingAddress.state
+                      ? `, ${order.billingAddress.state}`
+                      : ""}
+                    {order.billingAddress.postalCode
+                      ? ` ${order.billingAddress.postalCode}`
+                      : ""}
+                  </p>
+                  <p className="text-ash-200">
+                    {order.billingAddress.country}
+                  </p>
+                  {order.billingAddress.phone ? (
+                    <p className="text-ash-200">
+                      {order.billingAddress.phone}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </Card>
 
@@ -313,7 +344,7 @@ export function OrderDetails({ id }: { id: string }) {
               {order.paidAt ? (
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-ash-200">Paid on</span>
-                  <span>{formatDate(order.paidAt)}</span>
+                  <span>{formatDateTime(order.paidAt)}</span>
                 </div>
               ) : null}
             </div>
@@ -347,7 +378,8 @@ export function OrderDetails({ id }: { id: string }) {
                   >
                     <p className="font-medium">{toBadge(entry.status)}</p>
                     <p className="text-xs text-ash-200">
-                      {formatDate(entry.at)}
+                      {formatDateTime(entry.at)} ·{" "}
+                      {entry.by ? "Administrator" : "System"}
                       {entry.note ? ` — ${entry.note}` : ""}
                     </p>
                   </li>

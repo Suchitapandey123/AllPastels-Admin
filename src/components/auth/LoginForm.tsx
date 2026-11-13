@@ -46,7 +46,7 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: () => void }) {
       <div className="text-center">
         <h2 className="font-display text-2xl">Admin sign in</h2>
         <p className="mt-1 text-sm text-ash-200">
-          Log in with an admin account to manage the catalog.
+          Log in with an admin account to manage products, orders and settings.
         </p>
       </div>
       <div>

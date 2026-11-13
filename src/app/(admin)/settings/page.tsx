@@ -9,7 +9,7 @@ export default function SettingsPage() {
     <>
       <PageHeader
         title="Settings"
-        description="Checkout settings served live from the backend API."
+        description="Manage the shipping and tax rules the backend applies to every new checkout."
       />
       <CheckoutSettingsForm />
     </>

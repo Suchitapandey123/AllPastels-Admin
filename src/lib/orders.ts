@@ -26,6 +26,10 @@ export interface AdminOrderProduct {
   stock: number;
   sizes: string[];
   isActive: boolean;
+  // Not part of the current backend Product model; rendered only when the API
+  // supplies them so the UI never invents SKU or colour values.
+  sku?: string;
+  color?: string;
 }
 
 export interface AdminOrderItem {
@@ -33,6 +37,8 @@ export interface AdminOrderItem {
   qty: number;
   priceAtPurchase: number;
   size?: string;
+  // Optional variant snapshot, only shown when present.
+  color?: string;
 }
 
 export interface AdminOrderAddress {
@@ -80,6 +86,9 @@ export interface AdminOrder {
   customerEmail?: string;
   customerPhone?: string;
   shippingAddress: AdminOrderAddress | null;
+  // The current backend stores only a shipping address. Render a billing
+  // address when a future/legacy order payload includes one.
+  billingAddress?: AdminOrderAddress | null;
   orderNumber: string;
   items: AdminOrderItem[];
   subtotal: number;
