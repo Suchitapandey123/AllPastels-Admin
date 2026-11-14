@@ -5,10 +5,12 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { Spinner } from "@/components/ui/Spinner";
 import { AlertIcon, RefreshIcon } from "@/components/icons";
 import { NotFound } from "@/components/orders/OrderDetails";
-import { formatDateTime } from "@/lib/dates";
-import { formatINR } from "@/lib/format";
+import { formatDateTime } from "@/lib/utils/dates";
+import { formatINR } from "@/lib/utils/format";
+import { getErrorMessage } from "@/lib/utils/error";
 import { ApiError } from "@/lib/api";
 import {
   allowedNextStatuses,
@@ -17,10 +19,12 @@ import {
   paymentStatusLabel,
   toBadge,
   updateOrderStatus,
-  type AdminOrder,
-  type AdminOrderAddress,
-  type AdminOrderStatus,
-} from "@/lib/orders";
+} from "@/lib/services/orders.service";
+import type {
+  AdminOrder,
+  AdminOrderAddress,
+  AdminOrderStatus,
+} from "@/lib/types/order";
 
 function Detail({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -76,7 +80,7 @@ export function OrderEditForm({ id }: { id: string }) {
       if (err instanceof ApiError && err.status === 404) {
         setNotFound(true);
       } else {
-        setError(err instanceof Error ? err.message : "Failed to load order");
+        setError(getErrorMessage(err, "Failed to load order"));
       }
     }
   }, [id]);
@@ -107,10 +111,7 @@ export function OrderEditForm({ id }: { id: string }) {
     } catch (err) {
       setNotice({
         kind: "error",
-        text:
-          err instanceof Error
-            ? err.message
-            : "Failed to update the order status",
+        text: getErrorMessage(err, "Failed to update the order status"),
       });
     } finally {
       setBusy(false);
@@ -513,7 +514,7 @@ export function OrderEditForm({ id }: { id: string }) {
                       className="inline-flex items-center gap-2 rounded-sm bg-burnt-500 px-4 py-2 text-sm font-medium text-floral transition-colors hover:bg-burnt-400 disabled:opacity-60"
                     >
                       {busy ? (
-                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-floral border-t-burnt-400" />
+                        <Spinner className="border-floral border-t-burnt-400" />
                       ) : null}
                       Save status
                     </button>

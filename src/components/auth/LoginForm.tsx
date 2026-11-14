@@ -2,7 +2,9 @@
 
 import { useState, type FormEvent } from "react";
 import { AlertIcon } from "@/components/icons";
-import { loginAdmin } from "@/lib/auth";
+import { Spinner } from "@/components/ui/Spinner";
+import { loginAdmin } from "@/lib/services/auth.service";
+import { getErrorMessage } from "@/lib/utils/error";
 
 function looksLikeEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -31,7 +33,7 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: () => void }) {
       await loginAdmin(email, password);
       onLoggedIn();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(getErrorMessage(err, "Login failed"));
     } finally {
       setBusy(false);
     }
@@ -94,7 +96,7 @@ export function LoginForm({ onLoggedIn }: { onLoggedIn: () => void }) {
         className="inline-flex items-center justify-center gap-2 rounded-sm bg-burnt-500 px-4 py-2 text-sm font-medium text-floral transition-colors hover:bg-burnt-400 disabled:opacity-60"
       >
         {busy ? (
-          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-line border-t-floral" />
+          <Spinner className="border-line border-t-floral" />
         ) : null}
         Log in
       </button>

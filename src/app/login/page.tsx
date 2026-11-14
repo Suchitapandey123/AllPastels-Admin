@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoginForm } from "@/components/auth/LoginForm";
-import { hasAdminSession } from "@/lib/auth";
+import { hasAdminSession } from "@/lib/services/auth.service";
 
 export default function LoginPage() {
   const router = useRouter();

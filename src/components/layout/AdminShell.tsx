@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { navItems } from "@/data/admin";
-import { logoutAdmin } from "@/lib/auth";
+import { navItems } from "@/lib/constants/navigation";
+import { logoutAdmin } from "@/lib/services/auth.service";
 import {
   BellIcon,
   CloseIcon,

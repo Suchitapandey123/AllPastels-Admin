@@ -1,6 +1,5 @@
 import { ApiError } from "@/lib/api";
-
-const UPLOAD_PATH = "/api/uploads";
+import { ENDPOINTS } from "@/lib/constants/endpoints";
 
 /** Upload progress: 0–100 while sending, then "processing" once uploaded. */
 export type UploadProgress =
@@ -12,7 +11,7 @@ export type UploadProgress =
  *
  * Uses XMLHttpRequest (not fetch) so the browser can report byte-level
  * upload progress to `onProgress`; the response envelope and error mapping
- * match `apiFetch` exactly.
+ * match the shared API client exactly.
  */
 export function uploadImages(
   files: File[],
@@ -30,7 +29,7 @@ export function uploadImages(
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", UPLOAD_PATH);
+    xhr.open("POST", ENDPOINTS.uploads);
     xhr.responseType = "json";
 
     xhr.upload.addEventListener("progress", (event) => {
@@ -38,14 +37,22 @@ export function uploadImages(
       const percent = Math.round((event.loaded / event.total) * 100);
       // Once every byte is on the wire, the remaining wait is server-side
       // (Cloudinary) processing rather than upload.
-      onProgress?.(percent >= 100 ? { phase: "processing" } : { phase: "sending", percent });
+      onProgress?.(
+        percent >= 100
+          ? { phase: "processing" }
+          : { phase: "sending", percent },
+      );
     });
 
     xhr.addEventListener("load", () => {
       const payload = xhr.response;
       const envelope =
         payload && typeof payload === "object"
-          ? (payload as { success?: boolean; message?: string; data?: { urls?: string[] } })
+          ? (payload as {
+              success?: boolean;
+              message?: string;
+              data?: { urls?: string[] };
+            })
           : null;
 
       if (

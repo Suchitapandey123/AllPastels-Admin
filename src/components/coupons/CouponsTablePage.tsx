@@ -6,15 +6,18 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Table, Td, Th } from "@/components/ui/Table";
-import { AlertIcon, PencilIcon, PlusIcon, RefreshIcon, TrashIcon } from "@/components/icons";
+import { PencilIcon, PlusIcon, RefreshIcon, TrashIcon } from "@/components/icons";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { ErrorBanner } from "@/components/ui/ErrorBanner";
+import { getErrorMessage } from "@/lib/utils/error";
 import {
   couponDateText,
   couponDiscountText,
   couponStatus,
   listCoupons,
   deleteCoupon,
-  type Coupon,
-} from "@/lib/coupons";
+} from "@/lib/services/coupons.service";
+import type { Coupon } from "@/lib/types/coupon";
 
 export function CouponsTablePage() {
   const [coupons, setCoupons] = useState<Coupon[] | null>(null);
@@ -29,9 +32,7 @@ export function CouponsTablePage() {
       setCoupons(data);
       setError(null);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load coupons",
-      );
+      setError(getErrorMessage(err, "Failed to load coupons"));
     } finally {
       setLoading(false);
     }
@@ -49,9 +50,7 @@ export function CouponsTablePage() {
       setDeleting(null);
       await load();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to delete coupon",
-      );
+      setError(getErrorMessage(err, "Failed to delete coupon"));
     } finally {
       setDeleteBusy(false);
     }
@@ -84,21 +83,7 @@ export function CouponsTablePage() {
         }
       />
 
-      {error ? (
-        <div className="mb-4 flex flex-col items-start gap-3 rounded-sm bg-powder-800 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="flex items-start gap-2 text-sm text-powder-200">
-            <AlertIcon className="mt-0.5 h-4 w-4 shrink-0" />
-            {error}
-          </p>
-          <button
-            type="button"
-            onClick={load}
-            className="rounded-sm border border-powder-200 px-3 py-1.5 text-xs text-powder-100 transition-colors hover:bg-powder-800"
-          >
-            Retry
-          </button>
-        </div>
-      ) : null}
+      {error ? <ErrorBanner message={error} onRetry={load} /> : null}
 
       <Card>
         <CardHeader
@@ -215,42 +200,16 @@ export function CouponsTablePage() {
       </Card>
 
       {deleting ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ash-100/60 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Confirm delete coupon"
+        <ConfirmDialog
+          ariaLabel="Confirm delete coupon"
+          title="Delete coupon?"
+          busy={deleteBusy}
+          onCancel={() => setDeleting(null)}
+          onConfirm={() => handleDelete(deleting)}
         >
-          <div className="w-full max-w-sm rounded-sm border border-line bg-floral-500 p-5 shadow-xl">
-            <h2 className="mb-3 text-xl">Delete coupon?</h2>
-            <p className="text-sm">
-              Coupon <span className="font-medium">{deleting.code}</span> will
-              be permanently removed. Customers will no longer be able to use
-              it.
-            </p>
-            <div className="mt-5 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setDeleting(null)}
-                disabled={deleteBusy}
-                className="rounded-sm border border-line px-4 py-2 text-sm transition-colors hover:bg-surface"
-              >
-                Keep it
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDelete(deleting)}
-                disabled={deleteBusy}
-                className="inline-flex items-center gap-2 rounded-sm bg-powder-400 px-4 py-2 text-sm font-medium text-powder-100 transition-colors hover:bg-powder-300 disabled:opacity-60"
-              >
-                {deleteBusy ? (
-                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-powder-800 border-t-powder-100" />
-                ) : null}
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+          Coupon <span className="font-medium">{deleting.code}</span> will be
+          permanently removed. Customers will no longer be able to use it.
+        </ConfirmDialog>
       ) : null}
     </>
   );

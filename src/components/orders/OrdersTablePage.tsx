@@ -6,9 +6,11 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Table, Td, Th } from "@/components/ui/Table";
-import { AlertIcon, PencilIcon, RefreshIcon } from "@/components/icons";
-import { formatINR } from "@/lib/format";
-import { formatDate } from "@/lib/dates";
+import { PencilIcon, RefreshIcon } from "@/components/icons";
+import { ErrorBanner } from "@/components/ui/ErrorBanner";
+import { formatINR } from "@/lib/utils/format";
+import { formatDate } from "@/lib/utils/dates";
+import { getErrorMessage } from "@/lib/utils/error";
 import {
   ORDER_STATUS_FILTERS,
   PAYMENT_STATUS_FILTERS,
@@ -16,11 +18,13 @@ import {
   paymentMethodLabel,
   paymentStatusLabel,
   toBadge,
-  type AdminOrder,
-  type AdminPaymentStatus,
-  type AdminOrderStatus,
-  type OrdersQuery,
-} from "@/lib/orders";
+} from "@/lib/services/orders.service";
+import type {
+  AdminOrder,
+  AdminOrderStatus,
+  AdminPaymentStatus,
+  OrdersQuery,
+} from "@/lib/types/order";
 
 const EMPTY_QUERY: OrdersQuery = {
   q: "",
@@ -62,7 +66,7 @@ export function OrdersTablePage() {
       setOrders(data);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load orders");
+      setError(getErrorMessage(err, "Failed to load orders"));
     } finally {
       setLoading(false);
     }
@@ -115,21 +119,7 @@ export function OrdersTablePage() {
         }
       />
 
-      {error ? (
-        <div className="mb-4 flex flex-col items-start gap-3 rounded-sm bg-powder-800 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="flex items-start gap-2 text-sm text-powder-200">
-            <AlertIcon className="mt-0.5 h-4 w-4 shrink-0" />
-            {error}
-          </p>
-          <button
-            type="button"
-            onClick={load}
-            className="rounded-sm border border-powder-200 px-3 py-1.5 text-xs text-powder-100 transition-colors hover:bg-powder-800"
-          >
-            Retry
-          </button>
-        </div>
-      ) : null}
+      {error ? <ErrorBanner message={error} onRetry={load} /> : null}
 
       <Card className="mb-4">
         <div className="grid gap-3 px-5 py-4 sm:grid-cols-2 xl:grid-cols-6">

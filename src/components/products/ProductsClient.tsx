@@ -15,18 +15,21 @@ import {
   RefreshIcon,
   TrashIcon,
 } from "@/components/icons";
-import { formatINR } from "@/lib/format";
-import { formatDate } from "@/lib/dates";
-import { ApiError } from "@/lib/api";
-import { hasAdminSession, logoutAdmin } from "@/lib/auth";
+import { formatINR } from "@/lib/utils/format";
+import { formatDate } from "@/lib/utils/dates";
+import { getErrorMessage, isUnauthorized } from "@/lib/utils/error";
+import {
+  hasAdminSession,
+  logoutAdmin,
+  SESSION_EXPIRED_MESSAGE,
+} from "@/lib/services/auth.service";
 import {
   createProduct,
   deleteProduct,
   listProducts,
   updateProduct,
-  type Product,
-  type ProductInput,
-} from "@/lib/products";
+} from "@/lib/services/products.service";
+import type { Product, ProductInput } from "@/lib/types/product";
 
 type Notice = { tone: "success" | "error"; message: string };
 
@@ -56,9 +59,7 @@ export function ProductsClient() {
       setProducts(data);
       setLoadError(null);
     } catch (err) {
-      setLoadError(
-        err instanceof Error ? err.message : "Failed to load products",
-      );
+      setLoadError(getErrorMessage(err, "Failed to load products"));
     } finally {
       setLoading(false);
     }
@@ -100,7 +101,7 @@ export function ProductsClient() {
     setSession("guest");
     setNotice({
       tone: "error",
-      message: "Your session expired. Please log in again.",
+      message: SESSION_EXPIRED_MESSAGE,
     });
   }
 
@@ -131,7 +132,7 @@ export function ProductsClient() {
       setDialog(null);
       await load();
     } catch (err) {
-      if (err instanceof ApiError && err.status === 401) {
+      if (isUnauthorized(err)) {
         handleSessionExpired();
       }
       throw err instanceof Error
@@ -151,17 +152,16 @@ export function ProductsClient() {
       setDeleting(null);
       await load();
     } catch (err) {
-      if (err instanceof ApiError && err.status === 401) {
+      if (isUnauthorized(err)) {
         handleSessionExpired();
         setNotice({
           tone: "error",
-          message: "Your session expired. Please log in again.",
+          message: SESSION_EXPIRED_MESSAGE,
         });
       } else {
         setNotice({
           tone: "error",
-          message:
-            err instanceof Error ? err.message : "Failed to delete product",
+          message: getErrorMessage(err, "Failed to delete product"),
         });
       }
     } finally {

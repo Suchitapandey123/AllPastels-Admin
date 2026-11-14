@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -8,26 +8,21 @@ import {
   PlusIcon,
   StarIcon,
 } from "@/components/icons";
-import type { Product, ProductInput } from "@/lib/products";
-import { uploadImages, type UploadProgress } from "@/lib/uploads";
-
-const CATEGORY_SUGGESTIONS = ["Women", "Men", "Kids"];
-
-/** Product images cap — the first image is the storefront cover. */
-const IMAGE_MAX = 6;
-const MAX_FILE_BYTES = 10 * 1024 * 1024;
-const ALLOWED_MIME_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/avif",
-  "image/gif",
-];
-
-const META_TITLE_MAX = 200;
-const META_DESCRIPTION_MAX = 500;
-const META_KEYWORDS_MAX = 500;
-const IMAGE_ALT_MAX = 200;
+import { FormField } from "@/components/ui/FormField";
+import { Modal } from "@/components/ui/Modal";
+import { Spinner } from "@/components/ui/Spinner";
+import {
+  ALLOWED_MIME_TYPES,
+  CATEGORY_SUGGESTIONS,
+  IMAGE_ALT_MAX,
+  IMAGE_MAX,
+  MAX_FILE_BYTES,
+  META_DESCRIPTION_MAX,
+  META_KEYWORDS_MAX,
+  META_TITLE_MAX,
+} from "@/lib/constants/products";
+import { uploadImages, type UploadProgress } from "@/lib/services/uploads.service";
+import type { Product, ProductInput } from "@/lib/types/product";
 
 interface FormValues {
   name: string;
@@ -345,13 +340,11 @@ export function ProductDialog({
   const remainingSlots = IMAGE_MAX - values.images.length;
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-ash-100/60 p-4 py-10 sm:py-16"
-      role="dialog"
-      aria-modal="true"
-      aria-label={product ? "Edit product" : "Add product"}
+    <Modal
+      ariaLabel={product ? "Edit product" : "Add product"}
+      containerClassName="fixed inset-0 z-50 overflow-y-auto bg-ash-100/60 p-4 py-10 sm:py-16"
+      panelClassName="relative mx-auto w-full max-w-xl rounded-sm border border-line bg-floral-500 shadow-xl"
     >
-      <div className="relative mx-auto w-full max-w-xl rounded-sm border border-line bg-floral-500 shadow-xl">
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <h2 className="text-lg">
             {product ? "Edit product" : "Add product"}
@@ -367,7 +360,7 @@ export function ProductDialog({
           </button>
         </div>
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4 px-5 py-5">
-          <Field label="Name" error={errors.name} htmlFor="product-name">
+          <FormField label="Name" error={errors.name} htmlFor="product-name">
             <input
               id="product-name"
               className={`ap-input ${errors.name ? "border-powder-400" : ""}`}
@@ -376,9 +369,9 @@ export function ProductDialog({
               onChange={(e) => set("name", e.target.value)}
               autoFocus
             />
-          </Field>
+          </FormField>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field
+            <FormField
               label="Category"
               error={errors.category}
               htmlFor="product-category"
@@ -396,8 +389,8 @@ export function ProductDialog({
                   <option key={category} value={category} />
                 ))}
               </datalist>
-            </Field>
-            <Field
+            </FormField>
+            <FormField
               label="Price (₹)"
               error={errors.price}
               htmlFor="product-price"
@@ -410,10 +403,10 @@ export function ProductDialog({
                 onChange={(e) => set("price", e.target.value)}
                 placeholder="e.g. 1890"
               />
-            </Field>
+            </FormField>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field
+            <FormField
               label="Stock"
               error={errors.stock}
               htmlFor="product-stock"
@@ -425,8 +418,8 @@ export function ProductDialog({
                 value={values.stock}
                 onChange={(e) => set("stock", e.target.value)}
               />
-            </Field>
-            <Field
+            </FormField>
+            <FormField
               label="Sizes (comma separated)"
               error={errors.sizes}
               htmlFor="product-sizes"
@@ -438,9 +431,9 @@ export function ProductDialog({
                 onChange={(e) => set("sizes", e.target.value)}
                 placeholder="S, M, L"
               />
-            </Field>
+            </FormField>
           </div>
-          <Field
+          <FormField
             label="Description"
             error={errors.description}
             htmlFor="product-description"
@@ -453,7 +446,7 @@ export function ProductDialog({
               value={values.description}
               onChange={(e) => set("description", e.target.value)}
             />
-          </Field>
+          </FormField>
 
           {/* --- Images: upload, reorder, remove ------------------------- */}
           <fieldset>
@@ -627,7 +620,7 @@ export function ProductDialog({
               SEO &amp; search listing
             </summary>
             <div className="mt-3 flex flex-col gap-4">
-              <Field
+              <FormField
                 label="Meta title"
                 hint={`${values.metaTitle.length}/${META_TITLE_MAX} — search engines show roughly the first 60 characters`}
                 error={errors.metaTitle}
@@ -641,8 +634,8 @@ export function ProductDialog({
                   onChange={(e) => set("metaTitle", e.target.value)}
                   placeholder={`${values.name || "Product name"} | AllPastels`}
                 />
-              </Field>
-              <Field
+              </FormField>
+              <FormField
                 label="Meta description"
                 hint={`${values.metaDescription.length}/${META_DESCRIPTION_MAX} — search engines show roughly the first 160 characters`}
                 error={errors.metaDescription}
@@ -657,9 +650,9 @@ export function ProductDialog({
                   onChange={(e) => set("metaDescription", e.target.value)}
                   placeholder="One or two sentences describing the piece, as it should appear in search results."
                 />
-              </Field>
+              </FormField>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field
+                <FormField
                   label="Meta keywords"
                   hint={`Comma separated, ${values.metaKeywords.length}/${META_KEYWORDS_MAX}`}
                   error={errors.metaKeywords}
@@ -673,8 +666,8 @@ export function ProductDialog({
                     onChange={(e) => set("metaKeywords", e.target.value)}
                     placeholder="linen dress, summer, breathable"
                   />
-                </Field>
-                <Field
+                </FormField>
+                <FormField
                   label="Image alt text"
                   hint={`Describes the images for screen readers and image search, ${values.imageAlt.length}/${IMAGE_ALT_MAX}`}
                   error={errors.imageAlt}
@@ -688,7 +681,7 @@ export function ProductDialog({
                     onChange={(e) => set("imageAlt", e.target.value)}
                     placeholder="Front view of the piece on a model"
                   />
-                </Field>
+                </FormField>
               </div>
             </div>
           </details>
@@ -727,46 +720,12 @@ export function ProductDialog({
               className="inline-flex items-center gap-2 rounded-sm bg-burnt-500 px-4 py-2 text-sm font-medium text-floral transition-colors hover:bg-burnt-400 disabled:opacity-60"
             >
               {submitting ? (
-                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-line border-t-floral" />
+                <Spinner className="border-line border-t-floral" />
               ) : null}
               {product ? "Save changes" : "Create product"}
             </button>
           </div>
         </form>
-      </div>
-    </div>
-  );
-}
-
-function Field({
-  label,
-  hint,
-  error,
-  htmlFor,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  error?: string;
-  htmlFor: string;
-  children: ReactNode;
-}) {
-  return (
-    <div>
-      <label
-        htmlFor={htmlFor}
-        className="ap-eyebrow mb-1.5 block text-ash-300"
-      >
-        {label}
-      </label>
-      {children}
-      {error ? (
-        <p role="alert" className="mt-1 text-xs text-powder-300">
-          {error}
-        </p>
-      ) : hint ? (
-        <p className="mt-1 text-xs text-ash-200">{hint}</p>
-      ) : null}
-    </div>
+    </Modal>
   );
 }

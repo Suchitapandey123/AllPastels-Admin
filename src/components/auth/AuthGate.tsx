@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { hasAdminSession } from "@/lib/auth";
+import { hasAdminSession } from "@/lib/services/auth.service";
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const router = useRouter();

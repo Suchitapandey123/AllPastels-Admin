@@ -1,8 +1,10 @@
 "use client";
 
 import { CloseIcon } from "@/components/icons";
-import { formatINR } from "@/lib/format";
-import type { Product } from "@/lib/products";
+import { Modal } from "@/components/ui/Modal";
+import { Spinner } from "@/components/ui/Spinner";
+import { formatINR } from "@/lib/utils/format";
+import type { Product } from "@/lib/types/product";
 
 export function ConfirmDeleteDialog({
   product,
@@ -18,13 +20,10 @@ export function ConfirmDeleteDialog({
   if (!product) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ash-100/60 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Confirm delete"
+    <Modal
+      ariaLabel="Confirm delete"
+      panelClassName="w-full max-w-sm rounded-sm border border-line bg-floral-500 p-5 shadow-xl"
     >
-      <div className="w-full max-w-sm rounded-sm border border-line bg-floral-500 p-5 shadow-xl">
         <div className="mb-3 flex items-start justify-between">
           <h2 className="text-xl">Remove product?</h2>
           <button
@@ -58,12 +57,11 @@ export function ConfirmDeleteDialog({
             className="inline-flex items-center gap-2 rounded-sm bg-powder-400 px-4 py-2 text-sm font-medium text-powder-100 transition-colors hover:bg-powder-300 disabled:opacity-60"
           >
             {busy ? (
-              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-powder-800 border-t-powder-100" />
+              <Spinner className="border-powder-800 border-t-powder-100" />
             ) : null}
             Delete
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

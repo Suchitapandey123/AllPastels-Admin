@@ -3,14 +3,17 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Card, CardHeader } from "@/components/ui/Card";
-import { AlertIcon } from "@/components/icons";
+import { ErrorBanner } from "@/components/ui/ErrorBanner";
+import { FormNotice } from "@/components/ui/FormNotice";
+import { Spinner } from "@/components/ui/Spinner";
 import { ApiError } from "@/lib/api";
-import { formatINR } from "@/lib/format";
+import { formatINR } from "@/lib/utils/format";
+import { getErrorMessage } from "@/lib/utils/error";
 import {
   getCheckoutSettings,
   updateCheckoutSettings,
-  type CheckoutSettings,
-} from "@/lib/settings";
+} from "@/lib/services/settings.service";
+import type { CheckoutSettings } from "@/lib/types/settings";
 
 interface Notice {
   kind: "success" | "error";
@@ -61,9 +64,7 @@ export function CheckoutSettingsForm() {
       setReady(true);
     } catch (err) {
       setReady(false);
-      setError(
-        err instanceof Error ? err.message : "Failed to load checkout settings",
-      );
+      setError(getErrorMessage(err, "Failed to load checkout settings"));
     } finally {
       setLoading(false);
     }
@@ -146,35 +147,11 @@ export function CheckoutSettingsForm() {
   return (
     <form className="flex w-full max-w-2xl flex-col gap-4" onSubmit={handleSubmit}>
       {notice ? (
-        <div
-          className={`flex items-start gap-2 rounded-sm px-4 py-3 text-sm ${
-            notice.kind === "success"
-              ? "bg-cotton-500 text-cotton-100"
-              : "bg-powder-800 text-powder-200"
-          }`}
-          role={notice.kind === "success" ? "status" : "alert"}
-        >
-          {notice.kind === "error" ? (
-            <AlertIcon className="mt-0.5 h-4 w-4 shrink-0" />
-          ) : null}
-          {notice.text}
-        </div>
+        <FormNotice tone={notice.kind} message={notice.text} />
       ) : null}
 
       {error ? (
-        <div className="flex flex-col items-start gap-3 rounded-sm bg-powder-800 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="flex items-start gap-2 text-sm text-powder-200">
-            <AlertIcon className="mt-0.5 h-4 w-4 shrink-0" />
-            {error}
-          </p>
-          <button
-            type="button"
-            onClick={load}
-            className="rounded-sm border border-powder-200 px-3 py-1.5 text-xs text-powder-100 transition-colors hover:bg-powder-800"
-          >
-            Retry
-          </button>
-        </div>
+        <ErrorBanner message={error} onRetry={load} className="" />
       ) : null}
 
       {loading ? (
@@ -279,7 +256,7 @@ export function CheckoutSettingsForm() {
               className="inline-flex w-fit items-center gap-2 rounded-sm bg-burnt-500 px-5 py-2 text-sm font-medium text-floral transition-colors hover:bg-burnt-400 disabled:opacity-60"
             >
               {busy ? (
-                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-floral border-t-burnt-400" />
+                <Spinner className="border-floral border-t-burnt-400" />
               ) : null}
               Save changes
             </button>

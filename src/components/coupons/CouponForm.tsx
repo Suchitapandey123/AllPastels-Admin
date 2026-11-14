@@ -4,15 +4,19 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Spinner } from "@/components/ui/Spinner";
+import { getErrorMessage } from "@/lib/utils/error";
 import {
   couponDateInputValue,
   couponExpiresAtInput,
   createCoupon,
   updateCoupon,
-  type Coupon,
-  type CouponInput,
-  type DiscountType,
-} from "@/lib/coupons";
+} from "@/lib/services/coupons.service";
+import type {
+  Coupon,
+  CouponInput,
+  DiscountType,
+} from "@/lib/types/coupon";
 
 interface FormValues {
   code: string;
@@ -162,7 +166,7 @@ export function CouponForm({ coupon }: { coupon?: Coupon }) {
       }
       router.push("/coupons");
     } catch (err) {
-      setApiError(err instanceof Error ? err.message : "Something went wrong");
+      setApiError(getErrorMessage(err, "Something went wrong"));
     } finally {
       setSubmitting(false);
     }
@@ -397,7 +401,7 @@ export function CouponForm({ coupon }: { coupon?: Coupon }) {
               className="inline-flex items-center gap-2 rounded-sm bg-burnt-500 px-5 py-2 text-sm font-medium text-floral transition-colors hover:bg-burnt-400 disabled:opacity-60"
             >
               {submitting ? (
-                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-line border-t-floral" />
+                <Spinner className="border-line border-t-floral" />
               ) : null}
               {coupon ? "Save changes" : "Create coupon"}
             </button>

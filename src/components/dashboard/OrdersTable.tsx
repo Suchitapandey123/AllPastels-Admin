@@ -2,17 +2,8 @@ import Link from "next/link";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Table, Td, Th } from "@/components/ui/Table";
-import { formatINR } from "@/lib/format";
-
-export interface RecentOrderRow {
-  id: string;
-  customer: string;
-  detail?: string;
-  items: number;
-  total: number;
-  status: string;
-  date: string;
-}
+import { formatINR } from "@/lib/utils/format";
+import type { RecentOrderRow } from "@/lib/types/dashboard";
 
 export function OrdersTable({
   title,

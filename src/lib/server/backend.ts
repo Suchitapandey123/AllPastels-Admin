@@ -107,3 +107,35 @@ export async function bearerFetch(
   headers.set("Authorization", `Bearer ${token}`);
   return backendFetch(path, { ...init, headers });
 }
+
+export async function proxyMutation(
+  request: NextRequest,
+  path: string,
+  init: RequestInit & { method?: string } = {},
+): Promise<NextResponseType> {
+  const blocked = assertSameOrigin(request);
+  if (blocked) return blocked;
+  return passthrough(await bearerFetch(request, path, init));
+}
+
+export async function proxyJson(
+  request: NextRequest,
+  path: string,
+  method: "POST" | "PUT" | "PATCH",
+): Promise<NextResponseType> {
+  const blocked = assertSameOrigin(request);
+  if (blocked) return blocked;
+
+  const body = await request.text();
+  if (body.length === 0) {
+    return jsonError("Request body is required", 400);
+  }
+
+  return passthrough(
+    await bearerFetch(request, path, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body,
+    }),
+  );
+}

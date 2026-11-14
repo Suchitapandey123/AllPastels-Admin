@@ -1,12 +1,5 @@
 import { TrendDownIcon, TrendUpIcon } from "@/components/icons";
-
-export interface DashboardStat {
-  label: string;
-  value: string;
-  delta?: string;
-  up?: boolean;
-  note?: string;
-}
+import type { DashboardStat } from "@/lib/types/dashboard";
 
 export function SummaryCards({ stats }: { stats: DashboardStat[] }) {
   return (

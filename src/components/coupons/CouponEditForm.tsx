@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { CouponForm } from "@/components/coupons/CouponForm";
 import { NotFound } from "@/components/orders/OrderDetails";
-import { listCoupons, type Coupon } from "@/lib/coupons";
+import { listCoupons } from "@/lib/services/coupons.service";
+import type { Coupon } from "@/lib/types/coupon";
 
 export function CouponEditForm({ id }: { id: string }) {
   const [coupon, setCoupon] = useState<Coupon | null>(null);

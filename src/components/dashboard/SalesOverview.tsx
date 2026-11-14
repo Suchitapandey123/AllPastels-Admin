@@ -1,15 +1,6 @@
 import { Card, CardHeader } from "@/components/ui/Card";
-import { formatINR } from "@/lib/format";
-
-export interface SalesSeriesPoint {
-  label: string;
-  value: number;
-}
-
-export interface CategoryShare {
-  label: string;
-  share: number;
-}
+import { formatINR } from "@/lib/utils/format";
+import type { CategoryShare, SalesSeriesPoint } from "@/lib/types/dashboard";
 
 export function SalesOverview({
   series,

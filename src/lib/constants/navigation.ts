@@ -5,3 +5,5 @@ export const navItems = [
   { label: "Coupons", href: "/coupons" },
   { label: "Settings", href: "/settings" },
 ] as const;
+
+export type NavItem = (typeof navItems)[number];

@@ -4,10 +4,13 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { Modal } from "@/components/ui/Modal";
+import { Spinner } from "@/components/ui/Spinner";
 import { AlertIcon } from "@/components/icons";
 import { ApiError } from "@/lib/api";
-import { formatINR } from "@/lib/format";
-import { formatDate, formatDateTime } from "@/lib/dates";
+import { formatINR } from "@/lib/utils/format";
+import { formatDate, formatDateTime } from "@/lib/utils/dates";
+import { getErrorMessage } from "@/lib/utils/error";
 import {
   addOrderNote,
   cancelOrder,
@@ -15,8 +18,8 @@ import {
   paymentMethodLabel,
   paymentStatusLabel,
   toBadge,
-  type AdminOrder,
-} from "@/lib/orders";
+} from "@/lib/services/orders.service";
+import type { AdminOrder } from "@/lib/types/order";
 
 export function OrderDetails({ id }: { id: string }) {
   const [order, setOrder] = useState<AdminOrder | null>(null);
@@ -41,7 +44,7 @@ export function OrderDetails({ id }: { id: string }) {
       if (err instanceof ApiError && err.status === 404) {
         setNotFound(true);
       } else {
-        setError(err instanceof Error ? err.message : "Failed to load order");
+        setError(getErrorMessage(err, "Failed to load order"));
       }
     } finally {
       setLoading(false);
@@ -61,9 +64,7 @@ export function OrderDetails({ id }: { id: string }) {
       setCancelling(false);
       await load();
     } catch (err) {
-      setNotice(
-        err instanceof Error ? err.message : "Failed to cancel the order",
-      );
+      setNotice(getErrorMessage(err, "Failed to cancel the order"));
     } finally {
       setCancelBusy(false);
     }
@@ -79,7 +80,7 @@ export function OrderDetails({ id }: { id: string }) {
       setOrder(updated);
       setNoteText("");
     } catch (err) {
-      setNoteError(err instanceof Error ? err.message : "Failed to add note");
+      setNoteError(getErrorMessage(err, "Failed to add note"));
     } finally {
       setNoteBusy(false);
     }
@@ -437,13 +438,10 @@ export function OrderDetails({ id }: { id: string }) {
       </div>
 
       {cancelling ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ash-100/60 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Confirm cancel order"
+        <Modal
+          ariaLabel="Confirm cancel order"
+          panelClassName="w-full max-w-sm rounded-sm border border-line bg-floral-500 p-5 shadow-xl"
         >
-          <div className="w-full max-w-sm rounded-sm border border-line bg-floral-500 p-5 shadow-xl">
             <h2 className="mb-3 text-xl">Cancel order?</h2>
             <p className="text-sm">
               Order <span className="font-medium">{order.orderNumber}</span> will
@@ -465,13 +463,12 @@ export function OrderDetails({ id }: { id: string }) {
                 className="inline-flex items-center gap-2 rounded-sm bg-powder-400 px-4 py-2 text-sm font-medium text-powder-100 transition-colors hover:bg-powder-300 disabled:opacity-60"
               >
                 {cancelBusy ? (
-                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-powder-800 border-t-powder-100" />
+                  <Spinner className="border-powder-800 border-t-powder-100" />
                 ) : null}
                 Cancel order
               </button>
             </div>
-          </div>
-        </div>
+        </Modal>
       ) : null}
     </>
   );
